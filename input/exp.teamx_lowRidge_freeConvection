@@ -1,0 +1,119 @@
+#!/bin/bash
+# ICON
+#
+# ------------------------------------------
+# Copyright (C) 2004-2024, DWD, MPI-M, DKRZ, KIT, ETH, MeteoSwiss
+# Contact information: icon-model.org
+# See AUTHORS.TXT for a list of authors
+# See LICENSES/ for license information
+# SPDX-License-Identifier: BSD-3-Clause
+# ------------------------------------------
+#
+#-----------------------------------------------------------------------------
+# the namelist filename
+atmo_namelist=NAMELIST_${EXPNAME}
+#
+#-----------------------------------------------------------------------------
+# global timing
+start_date="2001-01-01T00:00:00Z"
+end_date="2001-01-01T00:03:00Z"
+#
+#-----------------------------------------------------------------------------
+# the grid file
+atmo_grid_file="grid_10240m_x_20480m_res20m.nc"
+atmo_grid_folder="/capstor/scratch/cscs/jcanton/teamx/input"
+atmo_dyn_grid=${atmo_grid_folder}/${atmo_grid_file}
+
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#
+# write ICON namelist parameters
+# ------------------------
+# For a complete list see Namelist_overview and Namelist_overview.pdf
+#
+cat >${atmo_namelist} <<EOF
+!
+&parallel_nml
+ nproma     = ${nproma}
+ nblocks_e  = ${nblocks_e}    ! loop number of edge blocks
+ nproma_sub = ${nproma_sub} ! loop chunk length for radiation scheme
+/
+&grid_nml
+ dynamics_grid_filename = "${atmo_dyn_grid}"
+ is_plane_torus         = .true.
+ corio_lat              = 1.0e-4
+/ 
+&run_nml
+ num_lev              = 250      ! number of full levels of vertical grid
+ dtime                = 0.2      ! [s] timestep in seconds
+ ltestcase            = .true.   ! run testcase --> testcase_ctl
+ ldynamics            = .true.   ! dynamics
+ ltransport           = .false.  ! transport
+ iforcing             = 0
+ ntracer              = 0        ! number of tracers - default 0
+ ltimer               = .true.
+ timers_level         = 10
+ msg_level            = 18       ! detailed report during integration
+ profiling_output     = 3
+ activate_sync_timers = .true.
+ output               = "nml"
+/
+&dynamics_nml
+ iequations     = 3
+ lcoriolis      = .true.
+ lmoist_thdyn   = .false.
+ divavg_cntrwgt = 0.50
+/
+&nh_testcase_nml
+ nh_test_name = 'teamx' ! test case identifier
+ mount_height  = 100.0
+/
+&nonhydrostatic_nml
+ ndyn_substeps  = 5          ! number of substeps
+ iadv_rhotheta  = 2
+ igradp_method  = 3          ! new default
+ rayleigh_coeff = 0.00333333 ! Rayleigh coefficient for damping in upper levels
+ damp_height    = 3000       ! damping height, keep top 5-10 levels for damping
+ divdamp_type   = 3          ! type of divergence damping (default = 3)
+ divdamp_order  = 24         ! order of divergence damping (only 24 is implemented in icon4py)
+ l_zdiffu_t     = .true.     ! specifies computation of Smagorinsky temperature diffusion
+ thslp_zdiffu   = 0.025      ! Smagorinsky diffusion coefficient for temperature
+ thhgtd_zdiffu  = 200.0      ! Height for temperature diffusion
+/
+&diffusion_nml
+ hdiff_order        = 5       ! order of nabla operator for diffusion
+ lhdiff_w           = .true.  ! diffusion on the vertical wind field
+ lhdiff_vn          = .true.
+ lhdiff_temp        = .true.
+ itype_vn_diffu     = 1       ! reconstruction method used for Smagorinsky diffusion
+ lsmag_3d           = .false. ! 3D Smagorinsky diffusion
+ itype_t_diffu      = 2       ! discretization of temperature diffusion
+ hdiff_efdt_ratio   = 36.0    ! ratio of e-folding time to time step
+ hdiff_w_efdt_ratio = 15.0    ! ratio of e-folding time to time step for vertical wind
+ hdiff_smag_fac     = 0.015   ! scaling factor for Smagorinsky diffusion
+ hdiff_multfac      = 1.0     ! these two are not implemented in icon4py ?!??!?!?!?!
+ hdiff_tv_ratio     = 1.0     ! these two are not implemented in icon4py ?!??!?!?!?!
+/
+&sleve_nml
+ top_height    = 5000.0
+ min_lay_thckn = 10.0         ! lowest level thickness (between half-levels), set 0 to do equal spacing
+ stretch_fac   = 1.0          ! stretching towards model top (1.0 default; smaller - bigger top level thickness)
+/
+&io_nml
+ dt_checkpoint        = 36000 ! [s] trigger new restart file
+ lnetcdf_flt64_output = .true.
+/
+! &icon4py_verification_nml
+!  dynamics = .TRUE.
+!  static = .TRUE.
+!  physics = .FALSE.
+!  serialization_start_date = "${start_date}"
+!  serialization_end_date = "${end_date}"
+! /
+EOF
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+# add standard atmo_non-hydrostatic_files
+. ${thisdir}/add_required_atmo_non-hydrostatic_files
+#-----------------------------------------------------------------------------
