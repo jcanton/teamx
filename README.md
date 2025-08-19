@@ -1,8 +1,16 @@
 # teamx
 
+## Structure
+
+You can take a look at the vertical levels by playing around with the `teamx`
+configuration in my
+[python-scripts](https://github.com/jcanton/python-scripts/blob/main/coordinates_discrete.py)
+repo
+
+
 ## Setting up
 
-hopefully all works
+Hopefully the computers behave
 
 ```[bash]
 cd $SCRATCH
