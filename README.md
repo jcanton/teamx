@@ -3,14 +3,13 @@
 ## Structure
 
 You can take a look at the vertical levels by playing around with the `teamx`
-configuration in my
+configuration of the `coordinates_discrete.py` script in my
 [python-scripts](https://github.com/jcanton/python-scripts/blob/main/coordinates_discrete.py)
-repo
-
+repo.
 
 ## Setting up
 
-Hopefully the computers behave
+Hopefully the computers behave...
 
 ```[bash]
 cd $SCRATCH
