@@ -20,9 +20,12 @@ end_date="2001-01-01T00:03:00Z"
 #
 #-----------------------------------------------------------------------------
 # the grid file
+teamx_folder="/capstor/scratch/cscs/jcanton/teamx/input"
+
+add_link_file
+
 atmo_grid_file="grid_10240m_x_20480m_res20m.nc"
-atmo_grid_folder="/capstor/scratch/cscs/jcanton/teamx/input"
-atmo_dyn_grid=${atmo_grid_folder}/${atmo_grid_file}
+atmo_dyn_grid=${teamx_folder}/${atmo_grid_file}
 
 #-----------------------------------------------------------------------------
 
