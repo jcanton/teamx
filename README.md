@@ -27,14 +27,16 @@ uenv start icon/25.2:v3 --view default
 
 The namelists are almost identical for the six cases, what changes is:
 
-- The sounding file:
+### The sounding file
 
 ```[bash]
 # the sounding file (needs to be called `sound_in` for ICON to read it)
 add_link_file ${teamx_folder}/soundings_tables/input_sounding_teamx_u10_ridge100 sound_in
 ```
 
-- The test case configuration (actually only the mountain height):
+### The test case configuration
+
+(actually only the mountain height)
 
 ```[bash]
 &nh_testcase_nml
@@ -44,7 +46,7 @@ add_link_file ${teamx_folder}/soundings_tables/input_sounding_teamx_u10_ridge100
 /
 ```
 
-- The SLEVE configuration:
+### The SLEVE configuration
 
 Use the following for flat and 100m hill:
 
