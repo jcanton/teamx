@@ -19,14 +19,16 @@ start_date="2001-01-01T00:00:00Z"
 end_date="2001-01-01T00:03:00Z"
 #
 #-----------------------------------------------------------------------------
-# the grid file
+# TeamX stuff
+#
 teamx_folder="/capstor/scratch/cscs/jcanton/teamx/input"
-
-add_link_file
-
-atmo_grid_file="grid_10240m_x_20480m_res20m.nc"
-atmo_dyn_grid=${teamx_folder}/${atmo_grid_file}
-
+#
+# the sounding file (needs to be called `sound_in` for ICON to read it)
+add_link_file ${teamx_folder}/soundings_tables/input_sounding_teamx_u10_ridge100 sound_in
+#
+# the grid file (can have whatever name, see below in `grid_nml`)
+atmo_dyn_grid="${teamx_folder}/grid_10240m_x_20480m_res20m.nc"
+#
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -46,7 +48,7 @@ cat >${atmo_namelist} <<EOF
  dynamics_grid_filename = "${atmo_dyn_grid}"
  is_plane_torus         = .true.
  corio_lat              = 1.0e-4
-/ 
+/
 &run_nml
  num_lev              = 250      ! number of full levels of vertical grid
  dtime                = 0.2      ! [s] timestep in seconds
@@ -98,7 +100,6 @@ cat >${atmo_namelist} <<EOF
  nh_test_name = 'teamx' ! test case identifier
  mount_height  = 100.0  ! height of the mountain
  mount_width   = 10240  ! = 512*20: wave length of the mountain (used gauss3d name to avoid creating a new one)
- table_sounding_name    ?!?
 /
 &sleve_nml
  min_lay_thckn   = 10.0        ! Layer thickness of lowermost layer
@@ -107,17 +108,23 @@ cat >${atmo_namelist} <<EOF
  stretch_fac     = 0.65        ! Scaling factor for stretching/squeezing the model layer distribution (NOTE: 0.65 for flat and 100m hill, 1.0 for 1000m hill)
  decay_scale_1   = 2000.0      ! Decay scale of large-scale topography component (NOTE: 2000.0 for 0 and 100m hill, 3000.0 for 1000m hill)
 /
+&output_nml
+ output_filename = '${EXPNAME}_insta'
+ output_grid     = .false.
+ filetype        = 4
+ dom             = -1
+ output_start    = "${start_date}"
+ output_end      = "${end_date}"
+ output_interval = "PT10M00S"
+ file_interval   = "PT10M00S"
+ include_last    = .true.
+ remap           = 0   ! 0: triangular grid, 1: regular grid
+ ml_varlist      = 'u','v','w','theta_v','pres','rho','z_ifc',
+/
 &io_nml
  dt_checkpoint        = 36000 ! [s] trigger new restart file
  lnetcdf_flt64_output = .true.
 /
-! &icon4py_verification_nml
-!  dynamics = .TRUE.
-!  static = .TRUE.
-!  physics = .FALSE.
-!  serialization_start_date = "${start_date}"
-!  serialization_end_date = "${end_date}"
-! /
 EOF
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
